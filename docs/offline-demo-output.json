@@ -1,0 +1,7 @@
+{
+  "mode": "offline-provider-fixtures",
+  "summary": "Получены задачи:\n1. Identify owner and deadline\n\nРезультаты выполнения задач:\n1. Demo owner: Anna. Demo deadline: Monday.",
+  "closed_spans": 1,
+  "closed_generations": 2,
+  "llm_quality_evaluated": false
+}

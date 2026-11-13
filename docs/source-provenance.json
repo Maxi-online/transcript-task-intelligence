@@ -1,0 +1,12 @@
+{
+  "sourceComponents": [
+    "."
+  ],
+  "excludedArtifactCategories": [
+    "duplicate or real-data development script",
+    "not source/configuration",
+    "private environment"
+  ],
+  "previousGitHistoryIncluded": false,
+  "datasetsAndWeightsIncluded": false
+}
