@@ -13,12 +13,12 @@ class LLMMonitoringProvider(ABC):
         metadata: Optional[Dict] = None,
         tags: Optional[list] = None
     ):
-        """Создает новый trace (трассировку) и возвращает его ID."""
+        'Creates a new trade and returns it to ID.'
         pass
 
     @abstractmethod
     def update_trace(self, trace = None, output: Optional[Dict] = None, **kwargs):
-        """Обновляет данные для существующего trace."""
+        'Updates data for existing trade.'
         pass
 
     @abstractmethod
@@ -36,17 +36,17 @@ class LLMMonitoringProvider(ABC):
         status_message: Optional[str] = None,
         **kwargs
     ):
-        """Создает новый span (промежуток) внутри trace и возвращает его ID."""
+        'Creates a new span inside trade and returns it to ID.'
         pass
 
     @abstractmethod
     def update_span(self, span = None, output: Optional[Dict] = None, **kwargs):
-        """Обновляет данные для существующего span."""
+        'Updates data for existing span.'
         pass
 
     @abstractmethod
     def end_span(self, span: Optional[Any] = None, output: Optional[Dict] = None):
-        """Завершает span."""
+        'Ends span.'
         pass
 
     @abstractmethod
@@ -65,17 +65,17 @@ class LLMMonitoringProvider(ABC):
         usage_details: Optional[Dict] = None,
         **kwargs
     ):
-        """Создает новый generation внутри trace."""
+        'Creates a new energy within the trade.'
         pass
 
     @abstractmethod
     def update_generation(self, generation = None, output: Optional[Dict] = None, **kwargs):
-        """Обновляет данные для существующего generation."""
+        'Updates data for existing energy.'
         pass
 
     @abstractmethod
     def end_generation(self, generation: Optional[Any] = None, output: Optional[Dict] = None):
-        """Завершает generation."""
+        'Completes the generation.'
         pass
 
     @abstractmethod
@@ -91,17 +91,17 @@ class LLMMonitoringProvider(ABC):
         status_message: Optional[str] = None,
         **kwargs
     ):
-        """Создает новый event внутри trace."""
+        'Creates a new event inside trade.'
         pass
 
     @abstractmethod
     def update_event(self, event: Optional[Any] = None, output: Optional[Dict] = None, **kwargs):
-        """Обновляет данные для существующего event."""
+        'Updates data for existing event.'
         pass
 
     @abstractmethod
     def end_event(self, event: Optional[Any] = None, output: Optional[Dict] = None):
-        """Завершает event."""
+        'Ends the event.'
         pass
 
     @abstractmethod
@@ -113,10 +113,10 @@ class LLMMonitoringProvider(ABC):
         comment: Optional[str] = None,
         observation_id: Optional[str] = None
     ):
-        """Добавляет оценку (score) к trace."""
+        'Adds the "score" to "trace".'
         pass
 
     @abstractmethod
     def flush(self):
-        """Отправляет все накопленные данные на сервер."""
+        'Sends all stored data to the server.'
         pass

@@ -2,12 +2,12 @@ from pathlib import Path
 from logging.config import dictConfig
 from src.config.app_config import settings
 
-# Получаем корневую директорию проекта (3 уровня вверх от текущего файла)
+# Get root project directory (3 levels up from current file))
 project_root = Path(__file__).parent.parent.parent
 log_dir = project_root / "logs"
 log_dir.mkdir(exist_ok=True)
 
-# Конфигурация логирования
+# Logging configuration
 LOG_CONFIG = {
     'version': 1,
     'disable_existing_loggers': False,
@@ -45,7 +45,7 @@ LOG_CONFIG = {
     },
     'loggers': {
         '': {
-            # Если нужно писать в файлы app.log и error.log
+            # If you have to write to app.log and error.log files
             'handlers': ['console', 'file', 'error_file'] if settings.write_logs_to_file else ['console'],
             'level': f'{settings.log_level}',
             'propagate': False
@@ -58,8 +58,8 @@ LOG_CONFIG = {
 }
 
 def configure_logging():
-    """Настройка логирования для всего проекта"""
+    'Logging settings for the whole project'
     dictConfig(LOG_CONFIG)
 
-# Автоматически применяем конфигурацию при импорте
+# Automatic import configuration
 configure_logging()

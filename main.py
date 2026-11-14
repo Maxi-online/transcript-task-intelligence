@@ -10,17 +10,17 @@ async def lifespan(app: FastAPI):
     import src.config.logging_config
     yield
 
-    print("Завершение работы приложения ...")
-    # Выполнение кода после завершения приложения
+    print('Completion of the Annex ...')
+    # Code implementation after annex
     if settings.langfuse.enabled and get_llm_monitoring.cache_info().currsize:
         try:
             get_llm_monitoring().flush()
-            print("Данные успешно загружены в Langfuse UI.")
+            print('The data are successfully downloaded from Langfuse UI.')
         except Exception as e:
-            print(f"Ошибка при загрузке данных в Langfuse UI: {e}")
+            print(f"Error when downloading data in Langfuse UI: {e}")
 
 
-# Определение fastapi app и routers
+# Definition of fastapi App and routers
 app = FastAPI(lifespan=lifespan)
 app.include_router(v1_router)
 

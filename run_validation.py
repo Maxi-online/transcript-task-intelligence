@@ -8,7 +8,7 @@ from src.infrastructure.api.v1.dependencies import (
     get_summarizer_agents,
     get_llm_monitoring,
 )
-from src.infrastructure.providers import OpenAIProvider  # NEW: провайдер для GPT-оценки
+from src.infrastructure.providers import OpenAIProvider  # NEW: GPT provider
 from src.core.agents.summarization import SummarizationAgent, SummarizationDTO
 
 
@@ -20,13 +20,13 @@ VAL_PATH = PROJECT_ROOT / "val.json"
 # -----------------------
 
 def extract_tasks(prompt: str) -> List[str]:
-    """Парсинг нумерованного списка задач в prompt.
+    """Parsing the numbered list of tasks in prompt.
 
-    Если нумерованных пунктов нет, возвращаем весь prompt как одну задачу.
+    If there are no numbered items, return the entire prompt as one task.
     """
-    # Удаляем перевод строки с Windows и пробелы в начале строк
+    # Delete the text from Windows and the blanks at the beginning of the lines
     prompt_clean = re.sub(r"\r", "", prompt)
-    # Ищем строки вида "1. <текст>" / "2. <текст>" и т. д.
+    # We're looking for a line of species "1. <text>" / "2. <text>", etc.
     tasks = re.findall(r"^\s*\d+\.\s*(.+)$", prompt_clean, flags=re.MULTILINE)
     if tasks:
         return [t.strip() for t in tasks]
@@ -38,14 +38,14 @@ def normalise(text: str) -> str:
 
 
 def check_list(expected_list: List[Any], generated: str) -> Tuple[bool, List[str]]:  # edited signature to Any
-    """Проверяем, что все элементы списка присутствуют в ответе.
+    """Check that all elements of the list are present in the response.
 
-    expected_list может содержать либо строки, либо словари с ключом "name".
+    expected_list may contain either rows or dictionaries with a "name" key".
     """
     missing: List[str] = []
     gen_norm = normalise(generated)
     for item in expected_list:
-        # Поддержка как строк, так и словарей вида {"name": ..., "stock_status": ...}
+        # Support for both rows and dictionaries of species {"name": ..., "stock_status"": ...}
         if isinstance(item, dict):
             expected_item = str(item.get("name", "")).strip()
         else:
@@ -62,31 +62,31 @@ def check_stock_status(expected_status: str, generated: str) -> bool:
 
 def check_summary(expected_summary: str, generated: str) -> bool:
     matcher = difflib.SequenceMatcher(None, normalise(expected_summary), normalise(generated))
-    return matcher.ratio() >= 0.7  # допускаем ~30% расхождения формулировок
+    return matcher.ratio() >= 0.7  # allowed ~30 per cent divergence of wording
 
 
 def build_expected_answer(expected: Dict[str, Any]) -> str:  # NEW helper
-    """Собирает человекочитаемое представление эталонного ответа."""
+    'Collects a man-readable benchmarking response.'
     parts: List[str] = []
     if "list_of_items" in expected:
-        # Приводим элементы к строке "<name> — <stock_status>" или просто имя
+        # Listed elements for the line "<name> — <stock_status>" or simply name
         items_str = []
         for el in expected["list_of_items"]:
             if isinstance(el, dict):
                 items_str.append(f"{el.get('name', '')} — {el.get('stock_status', '')}")
             else:
                 items_str.append(str(el))
-        parts.append("Список товаров: " + ", ".join(items_str))
+        parts.append('List of items: ' + ", ".join(items_str))
     elif "items" in expected:
         parts.append("Items: " + ", ".join(expected["items"]))
 
     if "stock_status" in expected:
-        parts.append(f"Статус наличия: {expected['stock_status']}")
+        parts.append(f"Availability status: {expected['stock_status']}")
 
     if "summary" in expected:
-        parts.append(f"Саммари: {expected['summary']}")
+        parts.append(f"Sammari: {expected['summary']}")
 
-    # Если ничего не подошло — сериализуем как JSON
+    # If nothing fits, we're gonna do it like JSON.
     if not parts:
         parts.append(json.dumps(expected, ensure_ascii=False))
 
@@ -94,29 +94,29 @@ def build_expected_answer(expected: Dict[str, Any]) -> str:  # NEW helper
 
 
 def gpt_evaluate(prompt_text: str, expected: str, generated: str, provider: OpenAIProvider) -> Dict[str, Any]:
-    """Оценивает качество ответа с помощью GPT-модели.
-    Возвращает словарь вида
+    """Assesss the quality of the response using the GPT model.
+    Returns the Vocabulary of the View
     {
         "score": float (0-100),
-        "explanation": str,            # основные причины такой оценки
-        "recommendations": str         # как улучшить ответ/агента
+        "explanation": str,            # Main reasons for this assessment
+        "recommendations": str         # How to Improve Response/agent
     }
     """
     eval_prompt = (
-        "Ты — эксперт, который оценивает, насколько ответ ассистента соответствует эталону. "
-        "Сначала выставь оценку (0–100, где 100 — полное совпадение). "
-        "Затем перечисли до 5 КОНКРЕТНЫХ причин (ссылайся на отсутствующие товары, неверные статусы, несоблюдение инструкций и т.д.), почему поставлена именно эта оценка. "
-        "Учитывай, насколько ассистент следовал задачам из промпта. "
-        "Верни STRICT JSON без пояснений вне JSON, пример:\n"
+        "You're an expert who evaluates how the assistant's response matches the benchmark. "
+        'First, make an estimate (0–100), where 100 is a complete match). '
+        'Then list up to 5 SPECIAL reasons (refer to missing goods, incorrect status, non-compliance with instructions, etc.), why this assessment is given. '
+        'Consider the extent to which the assistant followed the prompt task. '
+        'Return STRICT JSON without explanation outside JSON, example:\n'
         "{\\\"score\\\": 85, \\\"explanation\\\": \\\"...\\\"}\n\n"
-        f"Промпт пользователя (задачи):\n{prompt_text}\n\n"
-        f"Эталонный ответ:\n{expected}\n\n"
-        f"Ответ ассистента:\n{generated}"
+        f"User Prompt (tasks): \n{prompt_text}\n\n"
+        f"Reference reply: \n{expected}\n\n"
+        f"Assistant response:\n{generated}"
     )
 
     try:
         raw_response = provider.generate(eval_prompt)
-        # Выделяем JSON — ищем блок кода ```json … ``` или фигурные скобки
+        # Select JSON, looking for code block ```json … `'' or figure brackets
         code_match = re.search(r"```json\s*(\{[\s\S]+?\})\s*```", raw_response)
         if code_match:
             json_segment = code_match.group(1)
@@ -127,7 +127,7 @@ def gpt_evaluate(prompt_text: str, expected: str, generated: str, provider: Open
 
         data = json.loads(json_segment)
     except Exception:
-        # fallback: найти первое число и использовать весь ответ как explanation
+        # fallback: Find the first number and use the whole answer as an expansion
         try:
             first_num = re.search(r"\d{1,3}(?:\.\d+)?", raw_response)
             score_fallback = float(first_num.group(0)) if first_num else -1.0
@@ -145,9 +145,9 @@ def gpt_evaluate(prompt_text: str, expected: str, generated: str, provider: Open
 
 
 def overall_review(results: List[Dict[str, Any]], provider: OpenAIProvider) -> str:
-    """Формирует итоговый отчёт и рекомендации по улучшению на основе всех результатов."""
+    'Formulates final report and recommendations for improvement based on all results.'
     if not results:
-        return "Нет данных для итоговой оценки."
+        return 'No data for the final evaluation.'
 
     lines = []
     for r in results:
@@ -155,15 +155,15 @@ def overall_review(results: List[Dict[str, Any]], provider: OpenAIProvider) -> s
     joined = "\n".join(lines)
 
     prompt = (
-        "Ты — опытный аудитор LLM. На основе приведённых ниже индивидуальных оценок сформулируй: "
-        "1) краткий общий вердикт качества ответов, 2) ключевые слабые места, 3) рекомендации, как улучшить агента. "
-        "Ответ структурируй в виде списка пунктов.\n\n"
-        f"Индивидуальные оценки:\n{joined}"
+        "You're an experienced auditor of LLM. Based on individual assessments below, form: "
+        '(1) short general agreement on the quality of responses, (2) key weaknesses, (3) recommendations on how to improve the agent. '
+        'Set the answer in the form of a list of paragraphs.\n\n'
+        f"Individual estimates: \n{joined}"
     )
     try:
         return provider.generate(prompt)
     except Exception:
-        return "Не удалось получить итоговую рекомендацию от GPT."
+        return 'It was not possible to obtain a final recommendation from GPT.'
 
 
 def validate_item(
@@ -172,14 +172,14 @@ def validate_item(
     evaluator: OpenAIProvider,
     llm_monitoring
 ) -> Dict[str, Any]:
-    """Запускает агента на одном примере и возвращает результат валидации."""
-    # Подготовка входных данных
+    'Runs an agent on one example and returns the validation result.'
+    # Production of input data
     prompt: str = item["prompt"]
     dialog_key = "dialog" if "dialog" in item["input"] else "dialog_excerpt"
     text: str = item["input"][dialog_key]
     tasks = extract_tasks(prompt)
 
-    # Создаем trace для всей валидации данного item (независимо от трэйса внутри SummarizationAgent)
+    # Create a trade for the entire validation of this item (regardless of the track inside the SummaryAgent))
     trace = llm_monitoring.trace(
         name="validation-item",
         user_id="validation_user",
@@ -193,13 +193,13 @@ def validate_item(
     dto = SummarizationDTO(user_id="validation_user", text=text, tasks=tasks)
     generated_answer = agent.execute(dto)
 
-    # Сравнение с эталоном
+    # Comparison with the Master Standard
     expected = item["expected_output"]
     expected_readable = build_expected_answer(expected)  # NEW
     ok = True
     details: Dict[str, Any] = {}
 
-    # 1. Список товаров / items
+    # 1. List of goods / items
     if "list_of_items" in expected:
         passed, missing = check_list(expected["list_of_items"], generated_answer)
         ok &= passed
@@ -211,30 +211,30 @@ def validate_item(
         if not passed:
             details["missing_items"] = missing
 
-    # 2. Статус наличия товара
+    # 2. Status of availability of goods
     if "stock_status" in expected:
         passed = check_stock_status(expected["stock_status"], generated_answer)
         ok &= passed
         if not passed:
             details["stock_status_mismatch"] = expected["stock_status"]
 
-    # 3. Саммари (для pharmacy_summary)
+    # 3. Sammari (for pharmacy_summary))
     if "summary" in expected:
         passed = check_summary(expected["summary"], generated_answer)
         ok &= passed
         if not passed:
             details["summary_low_similarity"] = True
 
-    # NEW: GPT-оценка
+    # NEW: GPT evaluation
     gpt_score_data = gpt_evaluate(prompt, expected_readable, generated_answer, evaluator)
 
-    # NEW: считаем тест пройденным, только если GPT поставил 100 из 100
+    # NEW: Consider the test passed only if GPT delivered 100 out of 100
     ok = gpt_score_data["score"] >= 100.0
 
-    # Сохраняем пояснение GPT
+    # Save GPT explanation.
     details["gpt_explanation"] = gpt_score_data.get("explanation", "")
     
-    # Записываем оценку в Langfuse (от 0 до 1)
+    # Write down the Langfuse estimate (from 0 to 1)
     if gpt_score_data["score"] >= 0:
         llm_monitoring.score(
             trace_id=trace.id,
@@ -243,7 +243,7 @@ def validate_item(
             comment="LLM-as-a-judge",
         )
 
-    # Обновляем trace выводом
+    # Update track output
     llm_monitoring.update_trace(
         trace,
         output={
@@ -251,7 +251,7 @@ def validate_item(
             "expected": expected_readable,
             "gpt_score": gpt_score_data["score"],
             "gpt_explanation": gpt_score_data.get("explanation", ""),
-            # рекомендации убраны
+            # recommendations removed
             "passed": ok,
             "details": details,
         },
@@ -264,7 +264,7 @@ def validate_item(
         "expected": expected_readable,
         "gpt_score": gpt_score_data["score"],
         "gpt_explanation": gpt_score_data.get("explanation", ""),
-        # рекомендации убраны
+        # recommendations removed
         "details": details,
     }
 
@@ -281,12 +281,12 @@ def main(val_file: Path = VAL_PATH):
     llm_monitoring = get_llm_monitoring()
     agent = SummarizationAgent(llm_monitoring, summarizers)
 
-    # NEW: провайдер для оценки качества
-    evaluator_system_message = "Ты — эксперт-оценщик ответов."
+    # NEW: Quality assessment provider
+    evaluator_system_message = "You're an expert response rater."
     gpt_evaluator = OpenAIProvider(evaluator_system_message)
 
-    # NEW: провайдер для итоговой оценки
-    overall_system_message = "Ты — эксперт-аудитор ответов."
+    # NEW: Supplier for final evaluation
+    overall_system_message = "You're an expert responder."
     overall_reviewer = OpenAIProvider(overall_system_message)
 
     results: List[Dict[str, Any]] = []
@@ -295,36 +295,36 @@ def main(val_file: Path = VAL_PATH):
         results.append(result)
         status = "✅" if result["passed"] else "❌"
         print(f"{status} {result['id']} — GPT score: {result['gpt_score']}")  # UPDATED output
-        print("   Эталон:", result["expected"])
-        print("   Ответ бота:", result["generated"])
-        print("   Пояснение:", result["gpt_explanation"])
-        # рекомендации убраны
+        print('   Reference:', result["expected"])
+        print("   Boat's answer is:", result["generated"])
+        print('   Description:', result["gpt_explanation"])
+        # recommendations removed
         if not result["passed"]:
             print("   Details:", result["details"])
 
     total = len(results)
     passed = sum(1 for r in results if r["passed"])
     print("\n====================")
-    print(f"Итого: {passed}/{total} тестов пройдено успешно")
+    print(f"Total: {passed}/{total} Test passed successfully")
 
-    # NEW: выводим процент пройденных тестов и среднюю оценку GPT
+    # NEW: Take out the test rate and GPT average
     percent_passed = round((passed / total) * 100, 2) if total else 0.0
     valid_scores = [r["gpt_score"] for r in results if r["gpt_score"] >= 0]
     avg_score = round(sum(valid_scores) / len(valid_scores), 2) if valid_scores else 0.0
 
-    print(f"Процент прохождения: {percent_passed}%")
-    print(f"Средний GPT-балл: {avg_score}/100")
+    print(f"Percentage of pass: {percent_passed}%")
+    print(f"Medium GPT ball: {avg_score}/100")
 
-    # Итоговый обзор и рекомендации от GPT (один вызов)
+    # Outcome review and recommendations from GPT (one challenge)
     final_report = overall_review(results, overall_reviewer)
-    print("\n==== Итоговый отчёт GPT ====")
+    print('\n== sync, corrected by elderman == @elder_man')
     print(final_report)
 
-    # Отправляем все накопленные наблюдения в Langfuse
+    # Send all stored observations to Langfuse
     try:
         llm_monitoring.flush()
     except Exception as e:
-        print("Не удалось выгрузить данные в Langfuse:", e)
+        print('Could not unload the data to Langfuse:', e)
 
 
 if __name__ == "__main__":

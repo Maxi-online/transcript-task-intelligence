@@ -10,5 +10,5 @@ RUN pip install -r requirements.txt
 COPY src src/
 COPY main.py .
 
-# Запускаем приложение
+# Run the application
 CMD ["python", "main.py"]

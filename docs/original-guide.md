@@ -1,33 +1,33 @@
 # TRANSCRIPT-SERVICE
 
-## Инженерный обзор
+## Engineering review
 
-Сервис преобразования транскриптов в структурированные задачи. Код разделяет API, бизнес-логику анализа, интерфейсы LLM-провайдеров и мониторинг. Такой разрез позволяет сравнивать провайдеров и отдельно проверять сценарий отказа.
+Transforming transcriptions into structured tasks. Code splits API, business logic analysis, LLM providers interfaces and monitoring. This cut allows suppliers to be compared and the failure scenario to be checked separately.
 
-### Навигация по коду
+### Code navigation
 
 - [main.py](main.py)
 - [src/core/agents/summarization.py](src/core/agents/summarization.py)
 - [src/core/interfaces/providers.py](src/core/interfaces/providers.py)
 - [src/config/app_config.py](src/config/app_config.py)
 
-### Воспроизведение и оценка
+### Reproduction and evaluation
 
-Запрос с синтетическим транскриптом проходит через API и адаптер провайдера. Для оценки нужны размеченные ожидаемые задачи, проверка полей, переключение при отказе, задержка и стоимость каждого запроса. Текущие validation-скрипты могут обращаться к платному API; результаты fake-provider проверок не являются оценкой качества извлечения.
+Synthetic transcription request passes through the provider &apos; s API and adapter. The assessment requires placed expected tasks, field checking, switching when denied, delay and cost of each request. Current validation scripts may refer to a paid API; the fake provider verification results are not an output quality assessment.
 
 
-Сервис для аналитики результатов транскрибации с помощью AI/ML.
+A.I./ML Transcribation Analysis Service.
 
-## Технологии
+## Technology
 - Python 3.10+
-- Pydantic (валидация настроек)
+- Pydantic
 - FastAPI
 - Uvicorn
 - Docker
 
-## Быстрый старт
+## Fast start
 
-### Локальная установка
+### Local installation
 ```bash
 python -m venv .venv
 source .venv/bin/activate  # Linux/MacOS
@@ -37,25 +37,25 @@ pip install -r requirements.txt
 python main.py
 ```
 
-### Запуск через Docker
+### Start with Docker
 ```bash
-# Сборка контейнера
+# Container assembly
 docker build -t aian:latest . 
 
-# Запуск контейнера
+# Start container
 docker run -d -v $pwd/.env:/app/.env -p 8000:8000 --name aian aian:latest
 ```
 
-## Конфигурация
-Настройки через `.env` или переменные окружения.
-Полный список параметров в `.env.template`
+## Settings
+Alterations via `.env` or environment variables.
+`.env.template` complete list of parameters
 
-## Приватная конфигурация
+## Private configuration
 
-Ключи провайдеров, токены, пароли, прокси и персональные параметры задаются через переменные окружения. `.env.example` содержит имена без значений. Заполненный `.env` и локальные настройки исключены из Git. Не передавайте секреты аргументами команд и не публикуйте реальные журналы, выгрузки, сертификаты или пользовательские документы.
+Provider keys, tokens, passwords, proxy and personal parameters are set through variable environments. `.env.example` contains names without values. `.env` filled and local settings deleted from Git. Do not transmit secrets by command arguments and do not publish real magazines, downloads, certificates or user documents.
 
-Для запуска экспортируйте нужные переменные в окружение процесса либо заполните игнорируемый локальный `.env`, если используемый entrypoint его загружает. Содержимое `.env` само по себе не становится окружением произвольной Python-команды. Для Docker Compose значения из `.env` передаются в настроенные сервисы.
+To run, export the required variables to the process environment or fill the ignored local `.env` if the entrypoint used is downloading it. The content of `.env` does not in itself become an environment of arbitrary Python command. For Docker Compose, the values of `.env` are transferred to customized services.
 
-Имена приватных параметров приведены в [.env.example](.env.example). Старые значения сохранены только в защищённом локальном хранилище владельца; оно не входит в публикуемый проект. После ротации ключей используйте новые значения.
+The names of the private parameters are given in [.env.example](.env.example)). Old values are only retained in the protected local storage facility of the owner; it is not part of the published project. Once the keys are rotated, use new values.
 
-Проверка исходников и формата настроек не заменяет запуск инфраструктуры и оценку модели. Изменения приватности не подтверждают качество AI, работоспособность внешних API или готовность всей системы к эксплуатации.
+Checking the source and configuration formats does not replace the launch of the infrastructure and model evaluation. Privacy changes do not confirm the quality of AI, the performance of external APIs, or the willingness of the entire system to operate.

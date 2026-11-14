@@ -7,7 +7,7 @@ import logging
 
 
 class YandexProvider(LLMProvider):
-    """Провайдер для Yandex LLM API."""
+    "It's for Yandex LLM API."
     def __init__(self, system_message: str):
         super().__init__(system_message)
         self.logger = logging.getLogger(self.__class__.__name__)
@@ -15,7 +15,7 @@ class YandexProvider(LLMProvider):
 
         self.client = YCloudML(folder_id=settings.yandex.folder, auth=settings.yandex.api_key)
 
-        # Для обработки асинхронных запросов
+        # To handle asynchronous requests
         self.executor = ThreadPoolExecutor(max_workers=10)
 
     def _create_messages(self, prompt: str):
@@ -25,7 +25,7 @@ class YandexProvider(LLMProvider):
         ]
 
     def generate(self, prompt: str, **kwargs) -> str:
-        """Генерация текста через Yandex API."""
+        'Text generation via Yandex API.'
         try:
             messages = self._create_messages(prompt)
 
@@ -36,18 +36,18 @@ class YandexProvider(LLMProvider):
             ).run(messages=messages)
 
             if not completion.alternatives:
-                error_message = "API вернуло пустой массив alternatives."
+                error_message = 'The API returned an empty array of algorithms.'
                 self.logger.error(error_message)
                 raise ValueError(error_message)
 
             return completion.alternatives[0].text
 
         except Exception as e:
-            self.logger.error(f"Ошибка генерации: {str(e)}")
-            raise RuntimeError(f"Ошибка генерации: {str(e)}")
+            self.logger.error(f"Error of Generation: {str(e)}")
+            raise RuntimeError(f"Error of Generation: {str(e)}")
 
     async def agenerate(self, prompt: str, **kwargs) -> str:
-        """Асинхронная генерация текста через Yandex API."""
+        'Asynchronous text generation via Yandex API.'
         try:
             messages = self._create_messages(prompt)
 
@@ -60,12 +60,12 @@ class YandexProvider(LLMProvider):
             completion = await loop.run_in_executor(self.executor, func.run, messages)
 
             if not completion.alternatives:
-                error_message = "API вернуло пустой массив alternatives (асинхронный вызов)."
+                error_message = 'API returned an empty array of algorithms).'
                 self.logger.error(error_message)
                 raise ValueError(error_message)
 
             return completion.alternatives[0].text
 
         except Exception as e:
-            self.logger.error(f"Асинхронная ошибка генерации: {str(e)}")
-            raise RuntimeError(f"Асинхронная ошибка генерации: {str(e)}")
+            self.logger.error(f"Asynchronous error of generation: {str(e)}")
+            raise RuntimeError(f"Asynchronous error of generation: {str(e)}")

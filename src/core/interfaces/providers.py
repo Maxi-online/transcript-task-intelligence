@@ -3,17 +3,17 @@ from typing import Dict, Any
 
 
 class LLMProvider(ABC):
-    """Абстрактный базовый класс для всех LLM-провайдеров.
+    """An abstract basic class for all LLM providers.
 
     Methods:
-        generate(prompt: str) -> str: Генерация ответа на промт.
-        agenerate(prompt: str) -> str: Асинхронная генерация ответа на промт.
+        Generate(prompt: str) -> stre: Response generation for promt.
+        agenerate(prompt: STR) ->str: Asynchronous response generation.
     """
     def __init__(self, system_message: str):
-        """Инициализация базового класса для LLM-провайдеров.
+        """Basic Class Initialization for LLM Providers.
 
         Args:
-            system_message (str): Системная инструкция модели.
+            system_message (str): Model system instruction.
         """
         self.model_params: Dict[str, Any] | None = None
         self.system_message = system_message
@@ -21,30 +21,30 @@ class LLMProvider(ABC):
 
     @abstractmethod
     def generate(self, prompt: str) -> str:
-        """Генерация текста на основе промта.
+        """Text generation based on prom.
 
         Args:
-            prompt (str): Входной текст запроса.
+            prompt (str): Input text of the request.
 
         Returns:
-            str: Ответ модели.
+            str: Model response.
 
         Raises:
-            NotImplementedError: Если метод не реализован.
+            NotImplementedError: If the method is not implemented.
         """
-        raise NotImplementedError("Метод generate() должен быть переопределен")
+        raise NotImplementedError('The method of generality() shall be redefined')
 
     @abstractmethod
     async def agenerate(self, prompt: str) -> str:
-        """Асинхронная генерация текста на основе промта.
+        """Asynchronous text generation based on prom.
 
         Args:
-            prompt (str): Входной текст запроса.
+            prompt (str): Input text of the request.
 
         Returns:
-            str: Ответ модели.
+            str: Model response.
 
         Raises:
-            NotImplementedError: Если метод не реализован.
+            NotImplementedError: If the method is not implemented.
         """
-        raise NotImplementedError("Метод agenerate() должен быть переопределен")
+        raise NotImplementedError('The agenerate() method shall be redefined')

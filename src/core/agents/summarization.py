@@ -18,13 +18,13 @@ class SummarizationAgentDeprecated:
     async def execute(self, text: str, query: str) -> str:
         prompt = f"TEXT: {text}\nQUERY: {query}"
 
-        # Логика выбора провайдера
+        # Logic of the selection of a provider
         if self.provider_type == "yandex":
             provider = self.providers.get("yandex")
         elif self.provider_type == "deepseek":
             provider = self.providers.get("deepseek")
         else:
-            raise ValueError("Провайдер не найден")
+            raise ValueError('No guide found.')
 
         return await provider.agenerate(prompt)
 
@@ -78,13 +78,13 @@ class SummarizationAgent:
                     answers.append(answer)
                     break
                 else:
-                    answers.append("Ошибка выполнения задачи")
+                    answers.append('Error in performing the task')
                     failures += 1
             if failures == len(input_data.tasks):
                 self.llm_monitoring.update_trace(trace, output={"error": "all_providers_unavailable"})
                 raise ProvidersUnavailableError("All providers are unavailable")
-            result = "Получены задачи:" + "".join(f"\n{i}. {task}" for i, task in enumerate(input_data.tasks, 1))
-            result += "\n\nРезультаты выполнения задач:" + "".join(f"\n{i}. {answer}" for i, answer in enumerate(answers, 1))
+            result = 'The following tasks have been received:' + "".join(f"\n{i}. {task}" for i, task in enumerate(input_data.tasks, 1))
+            result += '\n\nOutcomes:' + "".join(f"\n{i}. {answer}" for i, answer in enumerate(answers, 1))
             self.llm_monitoring.update_span(span, metadata={"system_message": self.system_message, "failed_tasks": failures})
             self.llm_monitoring.event(name="final-output", trace_id=trace.id, parent_observation_id=trace.id,
                                       input={"tasks_results": answers}, output={"answer": result})

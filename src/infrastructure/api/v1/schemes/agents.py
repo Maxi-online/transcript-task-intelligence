@@ -13,5 +13,5 @@ class ErrorResponse(BaseModel):
 
 class SummarizeRequest(BaseModel):
     user_id: str = Field(default="test_user")
-    text: str = Field(default="12 апреля 1961 года Юрий Гагарин на корабле «Восток-1» совершил первый в истории человечества космический полет.")
-    tasks: List[str] = Field(default=["В каком году Юрий Гагарин совершил первый космический полет?", "Кто исполняет песню «Я свободен»?", "Удали все имена собственные из текста."])
+    text: str = Field(default='On 12 April 1961, Yuri Gagarin made the first space flight in the history of mankind on the East-1 ship.')
+    tasks: List[str] = Field(default=['What year did Yuri Gagarin make his first space flight?', 'Who sings "I\'m Free"?', 'Delete all names from the text.'])

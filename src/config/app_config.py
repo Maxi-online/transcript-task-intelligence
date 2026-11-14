@@ -3,10 +3,10 @@ from pathlib import Path
 from pydantic import Field, BaseModel
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
-# Переменные
+# Changed
 ENV_PATH = Path(__file__).resolve().parent.parent.parent / ".env"
 
-# Схема для хранения параметров модели
+# Schematic to store model parameters
 class ModelParams(BaseModel):
     name: str
     temperature: float = Field(default=0.2, ge=0, le=1)
@@ -15,19 +15,19 @@ class ModelParams(BaseModel):
 
 # ===== DeepSeek Settings =====
 class DeepSeekSettings(BaseSettings):
-    """Настройки для DeepSeek провайдера.
+    """It's for DeepSeek's service provider.
 
-    Теперь все поля сделаны необязательными, чтобы приложение могло
-    стартовать даже без соответствующих переменных окружения. При фактическом
-    обращении к провайдеру должна выполняться дополнительная проверка на
-    наличие необходимых параметров (base_url, model, api_key).
+    Now all fields are made optional so the application can
+    Start even without appropriate variables. Actual
+    Additional testing of the service provider should be carried out
+    Availability of necessary parameters (base_url, model, api_key)).
     """
 
     base_url: str | None = None
     model: str | None = None
     api_key: str | None = None
 
-    # Параметры модели
+    # Model Options
     name: str = "deepseek"
     temperature: float = Field(default=0.2, ge=0, le=1)
     max_tokens: int | None = None
@@ -49,14 +49,14 @@ class DeepSeekSettings(BaseSettings):
 
 # ===== Yandex Settings =====
 class YandexSettings(BaseSettings):
-    """Настройки для Yandex провайдера (поля сделаны необязательными)."""
+    'Mandex Provider settings (fields made optional)).'
 
     base_url: str | None = None
     model: str | None = None
     api_key: str | None = None
     folder: str | None = None
 
-    # Параметры модели
+    # Model Options
     name: str = "yandex"
     temperature: float = Field(default=0.2, ge=0, le=1)
     max_tokens: int | None = Field(default=None, ge=0, le=32768)
@@ -78,19 +78,19 @@ class YandexSettings(BaseSettings):
 
 # ===== OpenAI Settings =====
 class OpenAISettings(BaseSettings):
-    """Настройки для OpenAI провайдера (поля сделаны необязательными)."""
+    'OpenAI service provider settings (fields made optional)).'
 
-    # Базовый публичный endpoint OpenAI
+    # Basic Public Endpoint OpenAI
     base_url: str | None = "https://api.openai.com/v1"
     model: str | None = "gpt-4o-mini"
     api_key: str | None = None
 
-    # Параметры модели
+    # Model Options
     name: str = "openai"
     temperature: float = Field(default=0.2, ge=0, le=1)
     max_tokens: int | None = None
 
-    # Прокси, предоставленный пользователем
+    # Proxie provided by the user
     proxy_url: str | None = None
 
     @property
@@ -109,7 +109,7 @@ class OpenAISettings(BaseSettings):
     )
 
 class LangfuseSettings(BaseSettings):
-    """Настройки для Langfuse (поля сделаны необязательными)."""
+    '== sync, corrected by elderman == @elder_man'
 
     enabled: bool = True
     public_key: str | None = None
@@ -124,14 +124,14 @@ class LangfuseSettings(BaseSettings):
         env_prefix="LANGFUSE_"
     )
 
-# Все настройки проекта
+# All Project Settings
 class Settings(BaseSettings):
-    # Общие настройки приложения
+    # General application settings
     app_name: str = Field(default="AI Analysis Service", alias = "API_NAME")
     app_host: str = Field(default="0.0.0.0", alias = "API_HOST")
     app_port: int = Field(default=8000, alias = "API_PORT")
 
-    # Логирование
+    # Logging
     log_level: str = Field(default="INFO", alias = "LOG_LEVEL")
     write_logs_to_file: bool = Field(default=False, alias = "WRITE_LOGS_TO_FILE")
 
@@ -141,7 +141,7 @@ class Settings(BaseSettings):
         extra="ignore"
     )
 
-    # Настройки провайдеров
+    # Providers &apos; settings
     deepseek: DeepSeekSettings = Field(default_factory=DeepSeekSettings)
     yandex: YandexSettings = Field(default_factory=YandexSettings)
     openai: OpenAISettings = Field(default_factory=OpenAISettings)
