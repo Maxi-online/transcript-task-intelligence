@@ -10,16 +10,16 @@ from src.core.interfaces import LLMProvider
 
 
 class OpenAIProvider(LLMProvider):
-    """Провайдер для OpenAI API."""
+    'OpenAI API.'
     def __init__(self, system_message: str):
         super().__init__(system_message)
         self.logger = logging.getLogger(self.__class__.__name__)
         self.model_params = settings.openai.model_params.model_dump()
 
-        # ----- Настройка прокси -----
+        # -------------------------------------------------------------------------------------------
         self.proxy_url: str | None = settings.openai.proxy_url
 
-        # Cинхронный httpx клиент
+        # Synchronous httpx client
         sync_http_client: httpx.Client | None = None
         if self.proxy_url:
             sync_http_client = httpx.Client(
@@ -27,7 +27,7 @@ class OpenAIProvider(LLMProvider):
                 timeout=60.0,
             )
 
-        # Асинхронный httpx клиент
+        # Asynchronous httpx client
         async_http_client: httpx.AsyncClient | None = None
         if self.proxy_url:
             async_http_client = httpx.AsyncClient(
@@ -35,9 +35,9 @@ class OpenAIProvider(LLMProvider):
                 timeout=60.0,
             )
 
-        # ----- OpenAI SDK клиенты -----
+        # ----- OpenAI SDK clients -----
         base_url = settings.openai.base_url or "https://api.openai.com/v1"
-        # Удаляем ошибочный суффикс, если он есть
+        # Error: Remove the wrong sufix if it is
         if base_url.rstrip("/").endswith("chat/completions"):
             base_url = base_url.rsplit("/chat/completions", 1)[0]
 
@@ -63,7 +63,7 @@ class OpenAIProvider(LLMProvider):
         ]
 
     def generate(self, prompt: str, **kwargs) -> Optional[str]:
-        """Генерация текста через OpenAI API."""
+        'Text generation via OpenAI API.'
         try:
             messages = self._create_messages(prompt)
 
@@ -76,28 +76,28 @@ class OpenAIProvider(LLMProvider):
             )
 
             if not completion.choices:
-                error_message = "API вернуло пустой массив choices."
+                error_message = 'The API returned an empty array of choices.'
                 self.logger.error(error_message)
                 raise ValueError(error_message)
 
             return completion.choices[0].message.content
 
         except httpx.HTTPStatusError as e:
-            error_message = f"Ошибка запроса к API: {e.response.status_code}"
+            error_message = f"Error in Appeal: {e.response.status_code}"
             self.logger.error(error_message)
             raise ConnectionError(error_message)
 
         except httpx.TimeoutException:
-            error_message = "Таймаут запроса к API"
+            error_message = 'API Request Timeout'
             self.logger.warning(error_message)
             raise TimeoutError(error_message)
 
         except Exception as e:
-            self.logger.error(f"Ошибка генерации: {str(e)}")
-            raise RuntimeError(f"Ошибка генерации: {str(e)}")
+            self.logger.error(f"Error of Generation: {str(e)}")
+            raise RuntimeError(f"Error of Generation: {str(e)}")
 
     async def agenerate(self, prompt: str, **kwargs) -> Optional[str]:
-        """Асинхронная генерация текста."""
+        'Asynchronous text generation.'
         try:
             messages = self._create_messages(prompt)
 
@@ -110,22 +110,22 @@ class OpenAIProvider(LLMProvider):
             )
 
             if not completion.choices:
-                error_message = "API вернуло пустой массив choices (асинхронный вызов)"
+                error_message = 'API returned the empty choices.'
                 self.logger.error(error_message)
                 raise ValueError(error_message)
 
             return completion.choices[0].message.content
 
         except httpx.HTTPStatusError as e:
-            error_message = f"Ошибка асинхронного запроса к API: {e.response.status_code}"
+            error_message = f"Asynchronous request for API errors: {e.response.status_code}"
             self.logger.error(error_message)
             raise ConnectionError(error_message)
 
         except asyncio.TimeoutError:
-            error_message = "Таймаут асинхронного запроса к API"
+            error_message = 'API Asynchronous Request Time'
             self.logger.warning(error_message)
             raise TimeoutError(error_message)
 
         except Exception as e:
-            self.logger.error(f"Асинхронная ошибка генерации: {str(e)}")
-            raise RuntimeError(f"Асинхронная ошибка генерации: {str(e)}")
+            self.logger.error(f"Asynchronous error of generation: {str(e)}")
+            raise RuntimeError(f"Asynchronous error of generation: {str(e)}")

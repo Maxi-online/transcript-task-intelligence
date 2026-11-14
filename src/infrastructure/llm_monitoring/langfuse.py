@@ -51,7 +51,7 @@ class LangfuseProvider(LLMMonitoringProvider):
         status_message: Optional[str] = None,
         **kwargs
     ):
-        # Формирование метаданных для передачи в Langfuse
+        # Development of metadata for Langfuse transmission
         metadata_values = {}
         if model_parameters:
             metadata_values["model_parameters"] = model_parameters
@@ -95,7 +95,7 @@ class LangfuseProvider(LLMMonitoringProvider):
         usage_details: Optional[Dict] = None,
         **kwargs
     ):
-        # Формирование метаданных для передачи в Langfuse
+        # Development of metadata for Langfuse transmission
         metadata_values = {}
         if level:
             metadata_values["level"] = level
@@ -137,7 +137,7 @@ class LangfuseProvider(LLMMonitoringProvider):
         status_message: Optional[str] = None,
         **kwargs
     ):
-        # Формирование метаданных для передачи в Langfuse
+        # Development of metadata for Langfuse transmission
         metadata_values = {}
         if level:
             metadata_values["level"] = level

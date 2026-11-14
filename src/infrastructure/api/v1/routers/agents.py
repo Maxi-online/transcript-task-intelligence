@@ -47,7 +47,7 @@ async def summarize(
                     "status": "error",
                     "error": {
                         "type": "provider_error",
-                        "message": f"Ошибка сервиса AI-провайдера: {e.response.status_code}",
+                        "message": f"Error of the AI-Provider Service: {e.response.status_code}",
                         "details": {
                             "provider_status_code": e.response.status_code
                         }
@@ -62,7 +62,7 @@ async def summarize(
                     "status": "error",
                     "error": {
                         "type": "timeout",
-                        "message": "Таймаут соединения с AI-провайдером"
+                        "message": 'Timeout links to AI provider'
                     }
                 }
             )
@@ -86,7 +86,7 @@ async def summarize(
                     "status": "error",
                     "error": {
                         "type": "internal_error",
-                        "message": "Ошибка при выполнении суммаризации",
+                        "message": 'Error in summarizing',
                         "details": {
                             "exception_type": type(e).__name__
                         }
@@ -116,7 +116,7 @@ async def summarize(
                 "status": "error",
                 "error": {
                     "type": "critical_error",
-                    "message": "Внутренняя серверная ошибка"
+                    "message": 'Internal server error'
                 }
             }
         )

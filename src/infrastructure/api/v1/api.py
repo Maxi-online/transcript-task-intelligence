@@ -3,5 +3,5 @@ from fastapi import APIRouter
 
 router = APIRouter(prefix="/v1")
 
-# Подключение роутеров
+# Connecting routers
 router.include_router(agents_router)
